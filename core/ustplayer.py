@@ -124,6 +124,9 @@ class NoteLyricDisplay(QWidget):
         self.small_font_color_hex = validate_hex_color(
             ps.get("other_text_color", "#FFFFFF")
         )
+        self.pitch_curve_color_hex = validate_hex_color(
+            ps.get("pitch_curve_color", "#FFFFFF")
+        )
         self.note_alpha = 225
         self.copyright_alpha = 100
 
@@ -393,7 +396,7 @@ class NoteLyricDisplay(QWidget):
                     y = max(50, min(y, wh - 50))
                     points.append(QPointF(x, y))
                 if len(points) >= 2:
-                    pen = QPen(QColor(self.small_font_color_hex))
+                    pen = QPen(QColor(self.pitch_curve_color_hex))
                     pen.setWidth(self.note_line_width)
                     painter.setPen(pen)
                     painter.drawPolyline(QPolygonF(points))

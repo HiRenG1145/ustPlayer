@@ -32,6 +32,7 @@ class SettingsManager(QObject):
     lyric_color_changed = Signal(str)
     lyric_text_color_changed = Signal(str)
     other_text_color_changed = Signal(str)
+    pitch_curve_color_changed = Signal(str)
     lyric_pos_changed = Signal(str)
     lrc_path_changed = Signal(str)
     silent_display_changed = Signal(str)
@@ -86,6 +87,7 @@ class SettingsManager(QObject):
         self._lyric_color = "#FFFFFF"
         self._lyric_text_color = "#FFFFFF"
         self._other_text_color = "#FFFFFF"
+        self._pitch_curve_color = "#FFFFFF"
         self._lyric_pos = "上"
         self._lrc_path = ""
         self._silent_display = "R"
@@ -223,6 +225,16 @@ class SettingsManager(QObject):
         if self._other_text_color != v:
             self._other_text_color = v
             self.other_text_color_changed.emit(v)
+
+    @property
+    def pitch_curve_color(self) -> str:
+        return self._pitch_curve_color
+
+    @pitch_curve_color.setter
+    def pitch_curve_color(self, v: str):
+        if self._pitch_curve_color != v:
+            self._pitch_curve_color = v
+            self.pitch_curve_color_changed.emit(v)
 
     @property
     def lyric_pos(self) -> str:
@@ -491,7 +503,8 @@ class SettingsManager(QObject):
             f.write(f"note_color={self.note_color}\n")
             f.write(f"lyric_color={self.lyric_color}\n")
             f.write(f"lyric_text_color={self.lyric_text_color}\n")
-            f.write(f"other_text_color={self.other_text_color}\n\n")
+            f.write(f"other_text_color={self.other_text_color}\n")
+            f.write(f"pitch_curve_color={self.pitch_curve_color}\n\n")
 
             # 歌词与额外配置
             f.write("#LyricAndExtra\n")
@@ -522,6 +535,7 @@ class SettingsManager(QObject):
             "lyric_color": "lyric_color",
             "lyric_text_color": "lyric_text_color",
             "other_text_color": "other_text_color",
+            "pitch_curve_color": "pitch_curve_color",
             "lyric_pos": "lyric_pos",
             "lrc_path": "lrc_path",
             "silent_display": "silent_display",
@@ -609,5 +623,6 @@ class SettingsManager(QObject):
                 "end_custom_text": self.end_custom_text,
                 "pitch_placeholder": self.pitch_placeholder,
                 "pitch_custom_text": self.pitch_custom_text,
+                "pitch_curve_color": self.pitch_curve_color,
             },
         }

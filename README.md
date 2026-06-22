@@ -16,14 +16,6 @@
 </div>
 
 ## 📄下载说明
-请前往 Release 页面下载最新的压缩包/安装包文件
-
-v26b10及以前的版本通常是只有压缩包的，命名规则为`ustPlayer-版本号.zip`
-
-v26f19的压缩包通常是`ustPlayer-版本号-Windows-x64-Portable.zip`
-
-安装包通常是`ustPlayer-版本号-Windows-x64-Setup.exe`。
-
 软件仅支持Windows10 64位及以上版本，请确保您的系统符合要求。
 
 > [!WARNING]
@@ -54,4 +46,7 @@ v26f19的压缩包通常是`ustPlayer-版本号-Windows-x64-Portable.zip`
 
 ustPlayer版权由SYEternalR所有，授权给符合条件的任何用户免费使用。
 
-感谢使用，玩得开心！
+---
+<div align="center">
+🎉感谢使用，玩得开心！
+</div>

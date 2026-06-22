@@ -22,12 +22,11 @@ ustPlayer/
 │   ├── settings_manager.py     # 配置管理器（28个信号驱动属性）
 │   ├── ustreader.py            # UST 解析器（优化版）
 │   ├── ustplayer.py            # 全屏播放器（QPainter 渲染）
-│   ├── video_exporter.py        # 离线视频导出（imageio + ffmpeg）
 │   └── log.py                   # 日志系统（loguru）
 ├── ui/
 │   ├── basic_page.py           # 基础 — 项目信息、显示选项、Play
 │   ├── file_page.py            # 文件 — UST选择、编码、预览
-│   ├── player_style_page.py    # 播放器 — 5色选择、静默/结束显示
+│   ├── player_style_page.py    # 播放器 — 6色选择、静默/结束显示
 │   ├── lyric_page.py           # 歌词 — LRC导入、显示开关
 │   └── other_page.py           # 其他 — 版权、工具、协议
 ├── Terms.txt / ERcode.txt      # 协议与错误码
@@ -78,14 +77,14 @@ ustPlayer/
 - **音高线诊断**：播放器启动日志报告 `含PitchBend的音符=N`，音符切换时记录绘制决策
 - **颜色选择器升级**：`QColorDialog` → `ColorPickerButton`（qfluentwidgets 内置 Fluent 取色器），LineEdit ↔ Picker ↔ Settings 三向同步
 - **日志迁移 loguru**：彩色控制台 + 文件自动轮转（1MB/7天），`logger.exception()` 自动附完整堆栈
-
-### 新增：视频导出 (v26f19)
-
-将 UST 可视化渲染为 MP4 视频，离线不限速：
-
-- **基础页**新增 "导出视频" 按钮，选择 UST + 保存路径后即开始渲染
-- `core/video_exporter.py` — 创建离屏 `NoteLyricDisplay`，逐帧渲染 `QImage` → numpy → imageio 编码 H.264
-- `paintEvent` 拆出 `_paint_content(painter, w, h)`，实时播放与离线渲染共用同一绘制逻辑
+- **音高线独立颜色**：新增「音高线颜色」选项（`pitch_curve_color`），不再与"其他文字色"共用
+  - `core/settings_manager.py` — 新增第 29 个信号驱动属性，接入 `build_ust_info` / `export_uplr` / `import_uplr`
+  - `core/ustplayer.py` — 音高曲线画笔改用 `pitch_curve_color_hex`
+  - `ui/player_style_page.py` — 新增第 6 个颜色选择行（`ColorPickerButton` + `LineEdit`，三向同步）
+- **Bug 修复 (2026-06-22)**
+  - MessageBox 确认弹窗：取消按钮不再启动播放器（`main.py` — `else` 分支死逻辑）
+  - `hex_to_rgb()`：`tuple(generator)` → 显式 3 元组，类型安全
+  - 播放结束自动关闭：`QTimer.singleShot` → 命名 `QTimer`，`closeEvent` 提前停止防止竞态
 
 ### UI 改进
 
@@ -98,6 +97,5 @@ ustPlayer/
 PySide6 >= 6.5.0
 PySide6-Fluent-Widgets[full] >= 1.5.0
 loguru >= 0.7.0
-imageio[ffmpeg] >= 2.35.0
 numpy >= 1.26.0
 ```

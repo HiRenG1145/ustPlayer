@@ -15,7 +15,7 @@ from core.settings_manager import SettingsManager
 
 
 class PlayerStylePage(QWidget):
-    """播放器样式标签页 — 5 个颜色选择 + 歌词位置 + 静默/结束显示。"""
+    """播放器样式标签页 — 6 个颜色选择 + 歌词位置 + 静默/结束显示。"""
 
     def __init__(self, settings: SettingsManager, parent: Optional[QWidget] = None):
         super().__init__(parent)
@@ -32,11 +32,12 @@ class PlayerStylePage(QWidget):
 
         layout.addWidget(StrongBodyLabel("/ 播放器样式"))
 
-        # ---- 颜色选择行（ColorPickerButton + LineEdit） ----
+        # ---- 6 个颜色选择行（ColorPickerButton + LineEdit） ----
         self._add_color_row(layout, "背景色:", "bg_color", self._s.bg_color)
         self._add_color_row(layout, "音名色:", "note_color", self._s.note_color)
         self._add_color_row(layout, "歌字色:", "lyric_color", self._s.lyric_color)
         self._add_color_row(layout, "歌词色:", "lyric_text_color", self._s.lyric_text_color)
+        self._add_color_row(layout, "音高线颜色:", "pitch_curve_color", self._s.pitch_curve_color)
         self._add_color_row(layout, "其他文字色:", "other_text_color", self._s.other_text_color)
 
         # 歌词位置
@@ -130,7 +131,7 @@ class PlayerStylePage(QWidget):
         s = self._s
 
         # 颜色：LineEdit ↔ ColorPickerButton ↔ Settings 三向同步
-        for attr in ["bg_color", "note_color", "lyric_color", "lyric_text_color", "other_text_color"]:
+        for attr in ["bg_color", "note_color", "lyric_color", "lyric_text_color", "other_text_color", "pitch_curve_color"]:
             _edit: LineEdit = getattr(self, f"edit_{attr}")
             _picker: ColorPickerButton = getattr(self, f"picker_{attr}")
 
@@ -194,7 +195,7 @@ class PlayerStylePage(QWidget):
     def sync_all_from_settings(self):
         """导入 uplr 后同步 UI。"""
         s = self._s
-        for attr in ["bg_color", "note_color", "lyric_color", "lyric_text_color", "other_text_color"]:
+        for attr in ["bg_color", "note_color", "lyric_color", "lyric_text_color", "other_text_color", "pitch_curve_color"]:
             color = getattr(s, attr)
             edit: LineEdit = getattr(self, f"edit_{attr}")
             picker: ColorPickerButton = getattr(self, f"picker_{attr}")
