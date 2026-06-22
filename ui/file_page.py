@@ -59,7 +59,8 @@ class FilePage(QWidget):
         self.encoding_combo.setCurrentText(self._s.encoding)
         enc_row.addWidget(self.encoding_combo)
         enc_row.addStretch()
-        enc_row.addWidget(BodyLabel("编码检查 ⬇"))
+        self.encoding_check_btn = PushButton("编码检查")
+        enc_row.addWidget(self.encoding_check_btn)
         layout.addLayout(enc_row)
 
         # ---- 内容预览 ----
@@ -77,6 +78,7 @@ class FilePage(QWidget):
         self.ust_edit.textChanged.connect(lambda v: setattr(self._s, "ustx_path", v))
         self.select_btn.clicked.connect(self._on_select_ust)
         self.encoding_combo.currentTextChanged.connect(self._on_encoding_change)
+        self.encoding_check_btn.clicked.connect(self._on_encoding_check)
         self.cb_curve.checkStateChanged.connect(
             lambda v: setattr(self._s, "curve_show", v == Qt.CheckState.Checked)
         )
@@ -91,13 +93,22 @@ class FilePage(QWidget):
         )
         if file_path:
             self.ust_edit.setText(file_path)
-            self._preview(file_path)
 
     def _on_encoding_change(self, encoding: str):
         self._s.encoding = encoding
+
+    def _on_encoding_check(self):
+        """手动触发编码检查，使用当前编码重新读取并预览文件。"""
         path = self._s.ustx_path.strip()
-        if path and os.path.exists(path):
-            self._preview(path)
+        if not path:
+            InfoBar.warning("提示", "请先选择 UST 文件", 3000,
+                           parent=self.window(), position=InfoBarPosition.TOP_RIGHT)
+            return
+        if not os.path.exists(path):
+            InfoBar.error("ERcode001", "UST 文件不存在", 5000,
+                         parent=self.window(), position=InfoBarPosition.TOP_RIGHT)
+            return
+        self._preview(path)
 
     def _preview(self, file_path: str):
         try:

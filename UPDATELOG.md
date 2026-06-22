@@ -38,7 +38,7 @@ ustPlayer/
 - **侧边导航栏**：MSFluentWindow + NavigationInterface，替代原有自绘标签页
 - **日志系统**：`core/log.py` 提供文件（DEBUG）+ 控制台（INFO）双输出，记录启动信息、播放参数、异常堆栈
 - **信号驱动配置**：SettingsManager 的 28 个属性均通过 Qt Signal 通知变更，支持反应式数据绑定
-- **工程文件完整支持**：`.uplr` 导入/导出涵盖全部 5 个配置段
+- **工程文件完整支持**：`.uplr` 导入/导出涵盖全部 6 个配置段
 - **非阻塞提示**：InfoBar 替代 messagebox，不阻塞操作
 
 ### 优化
