@@ -4,94 +4,80 @@
 >本文档使用AI编写
 
 >[!CAUTION]
->此版本包含破坏性修改，可能不是很稳定，请三思而后行！
+>此版本为框架级重写，可能包含未发现的稳定性问题，请谨慎使用。
 
-## v26f19 (2026-06-19) — PySide6 Fluent 重制版
+## v26f19 (2026-06-19) — 全新 PySide6 现代化重制版
 
-### 框架迁移：tkinter → PySide6 + Fluent Design
+ustPlayer 从 tkinter 全面迁移至 PySide6 + Fluent Design，带来现代化的界面体验和更好的性能表现。
 
-全面重写 UI 框架，从 tkinter 迁移至 PySide6，采用 PySide6-Fluent-Widgets 组件库实现现代 Fluent Design 风格界面。
+---
 
-### 项目结构
+### 🎨 界面焕新
+
+- **侧边导航栏**：用图标 + 文字的侧边导航替代了原来的手绘标签页，切换更流畅、视觉更清晰。
+- **Fluent Design 风格**：采用微软 Fluent Design System 组件库，按钮、输入框、下拉框、开关等控件外观全面升级。
+- **Switch 开关**：原来基础页的复选框全部换成 Fluent 风格的滑动开关，更直观、更好看。
+- **InfoBar 非阻塞通知**：操作成功/失败的提示改为顶部滑入的 InfoBar，不再弹窗打断你的操作。
+- **内置取色器**：颜色选择从系统对话框升级为 Fluent 风格的内置取色面板，点击即出，同时支持手动输入 hex 色值，双向同步。
+
+---
+
+### ✨ 新增功能
+
+- **音高线独立颜色**：新增「音高线颜色」选项，不再与"其他文字色"共用，6 种颜色全部独立可配。
+- **日志系统**：新增 loguru 日志模块，文件（DEBUG 级别）+ 控制台（INFO 级别）双输出，播放异常时可以查看日志定位问题。
+- **编码检查按钮**：切换编码后不再自动刷新预览，改为点击「编码检查」按钮手动触发——切换编码和检查预览互不干扰。
+- **自定义文字**：音高间占位符、静默显示、结束显示均支持「自定义文字」选项，输入你想显示的任何内容。
+- **项目文件完整支持**：`.uplr` 工程文件的导入/导出覆盖全部 6 个配置段（编码、基础、显示、颜色、歌词、额外设置），不再遗漏任何配置。
+
+---
+
+### 🔧 优化改进
+
+- **文本渲染**：CJK 字形不再被裁切——使用 `QFontMetrics` 精确测量并预留 20% 边距。
+- **全屏播放器**：
+  - QPainter 硬件加速渲染，原生抗锯齿，画面更细腻。
+  - 窗口边缘不再漏出桌面（窗口标志在显示前统一设置）。
+  - 窗口大小变化时实时更新渲染坐标，不会偏移。
+  - 5ms 高精度 QTimer 刷新，播放节奏更准确。
+- **UST 解析器**：代码更健壮，文件自动关闭、异常信息更清晰。
+- **非模态确认弹窗**：启动播放器前的确认对话框采用 MessageBox，点取消不会再意外启动播放器。
+
+---
+
+### 🐛 已修复
+
+- **取消播放**：旧版在确认弹窗点取消后仍有可能启动播放器，现已修复。
+- **播放结束自动关闭**：修复了播放结束后定时器竞态可能导致窗口残留的问题。
+- **音高线颜色**：修复了音高曲线颜色与"其他文字色"共用的历史问题，现为独立配置项。
+
+---
+
+### 🏗️ 项目结构
 
 ```
 ustPlayer/
-├── main.py                     # 入口，QApplication + MSFluentWindow
+├── main.py                     # 程序入口
 ├── requirements.txt            # 依赖声明
 ├── core/
-│   ├── settings_manager.py     # 配置管理器（28个信号驱动属性）
-│   ├── ustreader.py            # UST 解析器（优化版）
+│   ├── settings_manager.py     # 配置管理器（信号驱动）
+│   ├── ustreader.py            # UST 文件解析器
 │   ├── ustplayer.py            # 全屏播放器（QPainter 渲染）
-│   └── log.py                   # 日志系统（loguru）
+│   └── log.py                  # 日志系统（loguru）
 ├── ui/
-│   ├── basic_page.py           # 基础 — 项目信息、显示选项、Play
-│   ├── file_page.py            # 文件 — UST选择、编码、预览
-│   ├── player_style_page.py    # 播放器 — 6色选择、静默/结束显示
+│   ├── basic_page.py           # 基础 — 项目信息、显示选项、播放
+│   ├── file_page.py            # 文件 — UST选择、编码检查、预览
+│   ├── player_style_page.py    # 播放器 — 6色选择、显示设置
 │   ├── lyric_page.py           # 歌词 — LRC导入、显示开关
 │   └── other_page.py           # 其他 — 版权、工具、协议
-├── Terms.txt / ERcode.txt      # 协议与错误码
-└── icon.ico / icon.png         # 图标
+└── ...
 ```
 
-### 新增功能
+> 对比旧版单文件 1149 行的 `main.py`，新版拆分为模块化结构，便于维护和扩展。
 
-- **侧边导航栏**：MSFluentWindow + NavigationInterface，替代原有自绘标签页
-- **日志系统**：`core/log.py` 提供文件（DEBUG）+ 控制台（INFO）双输出，记录启动信息、播放参数、异常堆栈
-- **信号驱动配置**：SettingsManager 的 28 个属性均通过 Qt Signal 通知变更，支持反应式数据绑定
-- **工程文件完整支持**：`.uplr` 导入/导出涵盖全部 6 个配置段
-- **非阻塞提示**：InfoBar 替代 messagebox，不阻塞操作
+---
 
-### 优化
-
-- **UST 解析器**：`with` 语句、类型注解、异常处理、独立解析函数
-- **文本渲染**：`QFontMetrics.horizontalAdvance() + height()` 替代 `boundingRect()`，20% padding 防止 CJK 字形裁切
-- **全屏播放器**：
-  - QPainter 硬件加速渲染，原生抗锯齿
-  - 窗口标志在 show 前统一设置，消除全屏边角漏出
-  - resizeEvent 实时更新尺寸，避免坐标偏移
-  - QTimer 5ms 高精度刷新
-
-### 组件对照
-
-| 原 tkinter | 新 PySide6 / qfluentwidgets |
-|-----------|----------------------------|
-| `tk.Tk()` | `QApplication` |
-| 自绘标签页 | `MSFluentWindow` + 侧边导航 |
-| `ttk.Entry` | `LineEdit` |
-| `ttk.Button` | `PrimaryPushButton` / `PushButton` |
-| `tk.Checkbutton` | `CheckBox` |
-| `ttk.Combobox` | `ComboBox` |
-| `scrolledtext.ScrolledText` | `TextEdit` (只读) |
-| `messagebox` | `InfoBar` / `MessageBox` |
-| `filedialog` | `QFileDialog` |
-| `colorchooser` | `ColorPickerButton`（Fluent 内置取色器）|
-| `tk.Canvas` | `QPainter` (paintEvent) |
-
-### 后续修复 (v26f19)
-
-- **颜色选择器升级**：`QColorDialog` → `ColorPickerButton`（qfluentwidgets 内置 Fluent 风格取色器）
-  - 点击即弹出 Fluent Design 取色面板，无需调用系统对话框
-  - LineEdit ↔ ColorPickerButton ↔ Settings 三向同步，双向更新互不干扰（`blockSignals` 防循环）
-- **文本裁切修复**：`boundingRect()` → `horizontalAdvance() + height()` + 20% padding，解决 CJK 字形被截问题
-- **全屏边角修复**：窗口标志在 `show()` 前统一设置 `FramelessWindowHint | WindowStaysOnTopHint`，消除边角漏出
-- **音高线诊断**：播放器启动日志报告 `含PitchBend的音符=N`，音符切换时记录绘制决策
-- **颜色选择器升级**：`QColorDialog` → `ColorPickerButton`（qfluentwidgets 内置 Fluent 取色器），LineEdit ↔ Picker ↔ Settings 三向同步
-- **日志迁移 loguru**：彩色控制台 + 文件自动轮转（1MB/7天），`logger.exception()` 自动附完整堆栈
-- **音高线独立颜色**：新增「音高线颜色」选项（`pitch_curve_color`），不再与"其他文字色"共用
-  - `core/settings_manager.py` — 新增第 29 个信号驱动属性，接入 `build_ust_info` / `export_uplr` / `import_uplr`
-  - `core/ustplayer.py` — 音高曲线画笔改用 `pitch_curve_color_hex`
-  - `ui/player_style_page.py` — 新增第 6 个颜色选择行（`ColorPickerButton` + `LineEdit`，三向同步）
-- **Bug 修复 (2026-06-22)**
-  - MessageBox 确认弹窗：取消按钮不再启动播放器（`main.py` — `else` 分支死逻辑）
-  - `hex_to_rgb()`：`tuple(generator)` → 显式 3 元组，类型安全
-  - 播放结束自动关闭：`QTimer.singleShot` → 命名 `QTimer`，`closeEvent` 提前停止防止竞态
-
-### UI 改进
-
-- **Switch 开关**：基础页 CheckBox 全部替换为 SwitchButton，新增 "/ 显示选项" "/ 音频" 分区
-- **侧边导航保留文字**：图标 + 中文标签
-
-### 依赖
+### 📦 依赖
 
 ```
 PySide6 >= 6.5.0
@@ -99,3 +85,5 @@ PySide6-Fluent-Widgets[full] >= 1.5.0
 loguru >= 0.7.0
 numpy >= 1.26.0
 ```
+
+> 相比旧版仅依赖 Python 标准库 + tkinter，新版需要安装以上第三方包。详见 `requirements.txt`。
