@@ -135,11 +135,7 @@ class OtherPage(QWidget):
         # 主题下拉框
         self.theme_combo.setCurrentText(self._theme_combo_text(s.theme_mode))
         self.theme_combo.currentTextChanged.connect(self._on_theme_combo_changed)
-        s.theme_mode_changed.connect(
-            lambda v: (self.theme_combo.blockSignals(True),
-                       self.theme_combo.setCurrentText(self._theme_combo_text(v)),
-                       self.theme_combo.blockSignals(False))
-        )
+        s.theme_mode_changed.connect(self._on_settings_theme_mode_changed)
 
         # 强调色模式下拉框
         self.accent_color_mode_combo.setCurrentText(
@@ -148,21 +144,12 @@ class OtherPage(QWidget):
         self.accent_color_mode_combo.currentTextChanged.connect(
             self._on_accent_color_mode_combo_changed
         )
-        s.accent_color_mode_changed.connect(
-            lambda v: (self.accent_color_mode_combo.blockSignals(True),
-                       self.accent_color_mode_combo.setCurrentText(
-                           self._accent_mode_text(v)),
-                       self.accent_color_mode_combo.blockSignals(False))
-        )
+        s.accent_color_mode_changed.connect(self._on_settings_accent_mode_changed)
 
         # 自定义颜色选择器
         self.accent_color_picker.setColor(QColor(s.custom_accent_color))
         self.accent_color_picker.colorChanged.connect(self._on_accent_color_pick)
-        s.custom_accent_color_changed.connect(
-            lambda v: (self.accent_color_picker.blockSignals(True),
-                       self.accent_color_picker.setColor(QColor(v)),
-                       self.accent_color_picker.blockSignals(False))
-        )
+        s.custom_accent_color_changed.connect(self._on_settings_accent_color_changed)
 
         # 初始时根据模式显示/隐藏自定义颜色选择器
         self._update_accent_custom_visible(s.accent_color_mode)
@@ -187,6 +174,25 @@ class OtherPage(QWidget):
     def _update_accent_custom_visible(self, mode: str):
         """自定义模式下显示颜色选择器。"""
         self.accent_color_picker.setVisible(mode == "custom")
+
+    def _on_settings_theme_mode_changed(self, v: str):
+        """settings 端主题模式变化 → 同步下拉框（避免 lambda GC 问题）。"""
+        self.theme_combo.blockSignals(True)
+        self.theme_combo.setCurrentText(self._theme_combo_text(v))
+        self.theme_combo.blockSignals(False)
+
+    def _on_settings_accent_mode_changed(self, v: str):
+        """settings 端强调色模式变化 → 同步下拉框。"""
+        self.accent_color_mode_combo.blockSignals(True)
+        self.accent_color_mode_combo.setCurrentText(self._accent_mode_text(v))
+        self.accent_color_mode_combo.blockSignals(False)
+        self._update_accent_custom_visible(v)
+
+    def _on_settings_accent_color_changed(self, v: str):
+        """settings 端自定义强调色变化 → 同步取色器。"""
+        self.accent_color_picker.blockSignals(True)
+        self.accent_color_picker.setColor(QColor(v))
+        self.accent_color_picker.blockSignals(False)
 
     # ===================== 辅助方法 =====================
 
