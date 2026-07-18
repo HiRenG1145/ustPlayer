@@ -61,6 +61,10 @@ jobs:
           echo "tag=${tag}" >> $GITHUB_OUTPUT
           echo "file=$(echo "${full}" | tr ' ' '-')" >> $GITHUB_OUTPUT
           echo "title=${full#v}" >> $GITHUB_OUTPUT
+          case "$full" in
+            *[Bb]eta*|*[Aa]lpha*) echo "prerelease=true" >> $GITHUB_OUTPUT ;;
+            *)                    echo "prerelease=false" >> $GITHUB_OUTPUT ;;
+          esac
 
       - name: 从 UPDATELOG.md 提取当前版本更新内容
         run: |
@@ -81,12 +85,23 @@ jobs:
           Compress-Archive -Path build/main.dist/* -DestinationPath $name
           "Artifact: $name" | Write-Host
 
+      - name: 创建 tag（commit 消息触发时）
+        if: github.ref_type != 'tag'
+        shell: bash
+        run: |
+          if ! git rev-parse "${{ steps.ver.outputs.title }}" >/dev/null 2>&1; then
+            git tag "${{ steps.ver.outputs.title }}"
+            git push origin "${{ steps.ver.outputs.title }}"
+          fi
+
       - name: 创建 Release 并上传产物
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.ver.outputs.title }}
           name: ${{ steps.ver.outputs.title }}
           body_path: changelog_body.md
           files: ustPlayer-${{ steps.ver.outputs.file }}-Windows-x64.zip
+          prerelease: ${{ steps.ver.outputs.prerelease == 'true' }}
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
