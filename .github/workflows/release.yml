@@ -42,11 +42,15 @@ jobs:
           enable-plugins: pyside6
           windows-console-mode: disable
 
+      - name: 解析版本号
+        id: ver
+        shell: bash
+        run: echo "num=${{ github.ref_name#v }}" >> $GITHUB_OUTPUT
+
       - name: 从 UPDATELOG.md 提取当前版本更新内容
         run: |
           $tag = '${{ github.ref_name }}'
           $content = Get-Content UPDATELOG.md -Raw -Encoding UTF8
-          # 匹配 "## v<tag> ..." 标题行，然后提取标题之后的内容，直到下一个 "## " 或文件末尾
           if ($content -match "(?ms)^## $tag\b[^\n]*\n(.*?)(?=\r?\n## |\Z)") {
               $section = $matches[1].Trim()
               "Found changelog section for $tag" | Write-Host
@@ -58,16 +62,16 @@ jobs:
 
       - name: 打包产物
         run: |
-          $name = "ustPlayer-${{ github.ref_name }}-Windows-x86_64.zip"
+          $name = "ustPlayer-${{ steps.ver.outputs.num }}-Windows-x64.zip"
           Compress-Archive -Path build/main.dist/* -DestinationPath $name
           "Artifact: $name" | Write-Host
 
       - name: 创建 Release 并上传产物
         uses: softprops/action-gh-release@v2
         with:
-          name: "ustPlayer ${{ github.ref_name }}"
+          name: ${{ steps.ver.outputs.num }}
           body_path: changelog_body.md
-          files: ustPlayer-${{ github.ref_name }}-Windows-x86_64.zip
+          files: ustPlayer-${{ steps.ver.outputs.num }}-Windows-x64.zip
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
