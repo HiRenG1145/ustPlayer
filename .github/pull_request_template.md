@@ -8,12 +8,11 @@
 
 <!--若有与这个 PR 关联的 Issue ，请将注释去掉，然后在下方写出相关 Issue 编号。
 Issue编号请像如下格式列出：
-Fixes #1
-Fixes #2
+close #1
+close #2
 ...
 可以查阅如下文档来查找可以使用的关键字：https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests
-中文：https://docs.github.com/zh/get-started/writing-on-github/working-with-advanced-formatting/
-using-keywords-in-issues-and-pull-requests
+中文：https://docs.github.com/zh/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests
 -->
 
 <!--## 破坏性变更(@_@)-->
@@ -26,7 +25,7 @@ using-keywords-in-issues-and-pull-requests
 我作出的破坏性变更如下：
 XXX模块。
 XXX模块。
-因为这样开发者无法准确的定位你做出的变更，也不会合并你的PR。
+因为这样开发者无法准确的定位你做出的变更，也将不会合并你的PR。
 -->
 
 ## 检查清单(。・ω・。)

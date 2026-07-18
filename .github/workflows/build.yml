@@ -20,6 +20,7 @@ jobs:
     # 获取短 commit SHA（如 599799e）
     - name: 获取短 commit SHA
       id: sha
+      shell: bash
       run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
     # 2. 设置 Python 3.12.9

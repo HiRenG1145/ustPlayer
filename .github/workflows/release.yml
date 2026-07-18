@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"          # 推送 v 开头的 tag 时触发
+  workflow_dispatch:
 
 jobs:
   release:
@@ -53,14 +54,20 @@ jobs:
               $section = "<!-- 未在 UPDATELOG.md 中找到 $tag 的更新说明 -->"
               "WARNING: No changelog section found for $tag" | Write-Host
           }
-          "$section`n`n---`n🤖 由 GitHub Actions 自动构建" | Set-Content changelog_body.md -Encoding UTF8
+          $section | Set-Content changelog_body.md -Encoding UTF8
+
+      - name: 打包产物
+        run: |
+          $name = "ustPlayer-${{ github.ref_name }}-Windows-x86_64.zip"
+          Compress-Archive -Path build/main.dist/* -DestinationPath $name
+          "Artifact: $name" | Write-Host
 
       - name: 创建 Release 并上传产物
         uses: softprops/action-gh-release@v2
         with:
           name: "ustPlayer ${{ github.ref_name }}"
-          body_path: changelog_body.md                  # 自动读取 UPDATELOG.md 对应版本内容
-          files: build/ustPlayer.exe
+          body_path: changelog_body.md
+          files: ustPlayer-${{ github.ref_name }}-Windows-x86_64.zip
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
