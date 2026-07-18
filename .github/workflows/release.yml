@@ -45,7 +45,9 @@ jobs:
       - name: 解析版本号
         id: ver
         shell: bash
-        run: echo "num=${{ github.ref_name#v }}" >> $GITHUB_OUTPUT
+        run: |
+          tag="${{ github.ref_name }}"
+          echo "num=${tag#v}" >> $GITHUB_OUTPUT
 
       - name: 从 UPDATELOG.md 提取当前版本更新内容
         run: |
