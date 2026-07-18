@@ -1,4 +1,4 @@
-name: 自动编译ustPlayer的可执行文件
+name: 自动编译 ustPlayer 可执行文件
 
 on:
   push:
@@ -17,7 +17,12 @@ jobs:
     - name: 检出代码
       uses: actions/checkout@v4
 
-    # 2. 设置 Python 3.12.9（精确版本）
+    # 获取短 commit SHA（如 599799e）
+    - name: 获取短 commit SHA
+      id: sha
+      run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    # 2. 设置 Python 3.12.9
     - name: 设置 Python 3.12.9
       uses: actions/setup-python@v5
       with:
@@ -26,20 +31,20 @@ jobs:
         cache: 'pip'
         cache-dependency-path: 'requirements.txt'
 
-    # 3. 安装所有依赖（包括 PySide6 等）
+    # 3. 安装依赖（包括 PySide6 等）
     - name: 安装依赖
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
     # 4. 使用 Nuitka 进行 standalone 打包
-    - name: 使用Nuitka打包
+    - name: 使用 Nuitka 打包
       uses: Nuitka/Nuitka-Action@main
       with:
-        # ********** 重要：将此处改为您的入口脚本文件名 **********
+        # 重要：将此处改为你的入口脚本文件名
         script-name: main.py
 
-        # 使用最新开发版（稳定版可省略该行，或指定具体版本如 '1.8'）
+        # 使用最新开发版（稳定版可省略该行，或指定具体版本如 1.8）
         nuitka-version: main
 
         # 打包模式：standalone（生成文件夹）
@@ -48,7 +53,7 @@ jobs:
         # 输出可执行文件名（不含扩展名，Windows 自动加 .exe）
         output-file: ustPlayer
 
-        # 包含根目录下的三个数据文件（复制到可执行文件同级）
+        # 将必要的数据文件复制到可执行文件同级目录
         include-data-files: |
           ERcode.txt=ERcode.txt
           Terms.txt=Terms.txt
@@ -60,16 +65,16 @@ jobs:
         # 启用 PySide6 插件（确保 Qt 资源正确打包）
         enable-plugins: pyside6
 
-        # （可选）隐藏控制台窗口，如果您的应用是 GUI 程序
+        # 如果应用是 GUI 程序，则隐藏控制台窗口
         windows-console-mode: disable
 
-        # （可选）包含更多参数，例如禁用控制台或启用详细日志
+        # 如需启用详细日志，可取消下面一行的注释
         # extra-args: '--verbose'
 
-    # 5. 上传构建产物（整个 build/ 文件夹）
+    # 5. 上传构建产物（build/main.dist/ 文件夹）
     - name: 上传构建产物
       uses: actions/upload-artifact@v4
       with:
-        name: ustPlayer-windows
-        path: build/
+        name: ustPlayer-${{ steps.sha.outputs.short }}-Windows
+        path: build/main.dist/
         include-hidden-files: true

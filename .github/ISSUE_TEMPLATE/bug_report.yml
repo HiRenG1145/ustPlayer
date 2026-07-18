@@ -1,6 +1,6 @@
 name: 🐛 Bug 报告
 description: 反馈程序异常、崩溃或行为不符合预期的问题。
-title: "[Bug] 你要反馈的Bug"
+title: "[Bug] 简要描述你遇到的问题"
 labels: ["bug"]
 body:
   - type: markdown
@@ -11,7 +11,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: uPl 版本
+      label: ustPlayer 版本
       description: 你使用的 ustPlayer 版本号（可在"其他"页面或更新日志中查看）。
       placeholder: 例如 v26a31
     validations:

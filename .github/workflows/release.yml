@@ -1,0 +1,66 @@
+name: 自动发布 Release
+
+on:
+  push:
+    tags:
+      - "v*"          # 推送 v 开头的 tag 时触发
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 3.12.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.9"
+          architecture: "x64"
+          cache: "pip"
+          cache-dependency-path: "requirements.txt"
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 使用 Nuitka 打包
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          script-name: main.py
+          nuitka-version: main
+          mode: standalone
+          output-file: ustPlayer
+          include-data-files: |
+            ERcode.txt=ERcode.txt
+            Terms.txt=Terms.txt
+            icon.ico=icon.ico
+          windows-icon-from-ico: icon.ico
+          enable-plugins: pyside6
+          windows-console-mode: disable
+
+      - name: 从 UPDATELOG.md 提取当前版本更新内容
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $content = Get-Content UPDATELOG.md -Raw -Encoding UTF8
+          # 匹配 "## v<tag> ..." 标题行，然后提取标题之后的内容，直到下一个 "## " 或文件末尾
+          if ($content -match "(?ms)^## $tag\b[^\n]*\n(.*?)(?=\r?\n## |\Z)") {
+              $section = $matches[1].Trim()
+              "Found changelog section for $tag" | Write-Host
+          } else {
+              $section = "<!-- 未在 UPDATELOG.md 中找到 $tag 的更新说明 -->"
+              "WARNING: No changelog section found for $tag" | Write-Host
+          }
+          "$section`n`n---`n🤖 由 GitHub Actions 自动构建" | Set-Content changelog_body.md -Encoding UTF8
+
+      - name: 创建 Release 并上传产物
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "ustPlayer ${{ github.ref_name }}"
+          body_path: changelog_body.md                  # 自动读取 UPDATELOG.md 对应版本内容
+          files: build/ustPlayer.exe
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
