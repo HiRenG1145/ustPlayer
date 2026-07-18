@@ -52,11 +52,15 @@ jobs:
         run: |
           if [ "${{ github.ref_type }}" = "tag" ]; then
             tag="${{ github.ref_name }}"
+            full="${{ github.ref_name }}"
           else
-            tag=$(echo "${{ github.event.head_commit.message }}" | cut -d' ' -f1)
+            msg="${{ github.event.head_commit.message }}"
+            tag=$(echo "$msg" | cut -d' ' -f1)
+            full=$(echo "$msg" | tr ' ' '-')
           fi
           echo "tag=${tag}" >> $GITHUB_OUTPUT
-          echo "num=${tag#v}" >> $GITHUB_OUTPUT
+          echo "file=$(echo "${full}" | tr ' ' '-')" >> $GITHUB_OUTPUT
+          echo "title=${full#v}" >> $GITHUB_OUTPUT
 
       - name: 从 UPDATELOG.md 提取当前版本更新内容
         run: |
@@ -73,16 +77,16 @@ jobs:
 
       - name: 打包产物
         run: |
-          $name = "ustPlayer-${{ steps.ver.outputs.num }}-Windows-x64.zip"
+          $name = "ustPlayer-${{ steps.ver.outputs.file }}-Windows-x64.zip"
           Compress-Archive -Path build/main.dist/* -DestinationPath $name
           "Artifact: $name" | Write-Host
 
       - name: 创建 Release 并上传产物
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ steps.ver.outputs.num }}
+          name: ${{ steps.ver.outputs.title }}
           body_path: changelog_body.md
-          files: ustPlayer-${{ steps.ver.outputs.num }}-Windows-x64.zip
+          files: ustPlayer-${{ steps.ver.outputs.file }}-Windows-x64.zip
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
