@@ -10,6 +10,9 @@ on:
 
 jobs:
   build:
+    # push 时如果 commit 消息以 v 开头（发版提交），跳过构建（交由 release.yml 处理）
+    if: |
+      github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'v')
     runs-on: windows-latest   # 仅构建 Windows 可执行文件
 
     steps:
