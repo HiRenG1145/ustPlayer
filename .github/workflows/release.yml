@@ -59,7 +59,7 @@ jobs:
             full=$(echo "$msg" | tr ' ' '-')
           fi
           echo "tag=${tag}" >> $GITHUB_OUTPUT
-          echo "file=$(echo "${full}" | tr ' ' '-')" >> $GITHUB_OUTPUT
+          echo "file=$(echo "${full}" | tr ' ' '-' | sed 's/Beta/beta/g; s/Alpha/alpha/g')" >> $GITHUB_OUTPUT
           echo "title=${full#v}" >> $GITHUB_OUTPUT
           case "$full" in
             *[Bb]eta*|*[Aa]lpha*) echo "prerelease=true" >> $GITHUB_OUTPUT ;;
@@ -82,6 +82,7 @@ jobs:
           }
           $section | Set-Content changelog_body.md -Encoding UTF8
           "title=$heading" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "tag_name=$($heading -replace ' ', '-')" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: 打包产物
         run: |
@@ -93,15 +94,15 @@ jobs:
         if: github.ref_type != 'tag'
         shell: bash
         run: |
-          if ! git rev-parse "${{ steps.changelog.outputs.title }}" >/dev/null 2>&1; then
-            git tag "${{ steps.changelog.outputs.title }}"
-            git push origin "${{ steps.changelog.outputs.title }}"
+          if ! git rev-parse "${{ steps.changelog.outputs.tag_name }}" >/dev/null 2>&1; then
+            git tag "${{ steps.changelog.outputs.tag_name }}"
+            git push origin "${{ steps.changelog.outputs.tag_name }}"
           fi
 
       - name: 创建 Release 并上传产物
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.changelog.outputs.title }}
+          tag_name: ${{ steps.changelog.outputs.tag_name }}
           name: ${{ steps.changelog.outputs.title }}
           body_path: changelog_body.md
           files: ustPlayer-${{ steps.ver.outputs.file }}-Windows-x64.zip
