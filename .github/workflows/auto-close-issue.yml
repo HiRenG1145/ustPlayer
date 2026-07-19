@@ -6,9 +6,6 @@ on:
 
 jobs:
   close-issues:
-    # pass 或 v 开头的消息跳过
-    if: |
-      !startsWith(github.event.head_commit.message, 'pass') && !startsWith(github.event.head_commit.message, 'v')
     runs-on: ubuntu-latest
     permissions:
       issues: write
