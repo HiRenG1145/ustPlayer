@@ -1,4 +1,4 @@
-<!--感谢你对 ustPlayer 做出贡献！建议您在提交PR时勾选 "Allow edits by maintainers" ，以让开发者帮忙寻找错误并帮助改正。-->
+<!--感谢你对 ustPlayer 做出贡献！建议您在提交PR时勾选 "Allow edits and access to secrets by maintainers" ，以让开发者帮忙寻找错误并帮助改正。-->
 <!--若您修复了一个或多个 Bug ，请在 PR 标题前增加 'fix:' ，若您增加了一个或多个功能，请在PR标题前增加 'feat:' 。-->
 
 ## 这个 Pull Request 是干什么的o(•ω•`)o
